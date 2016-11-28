@@ -331,7 +331,7 @@ getmode <- function(x) {
 }
 
 results$final.prediction <- apply(results,1,getmode)
-
+results
 
 confusionMatrix(results$final.prediction, results$actual.label)
 # accuracy of 0.9242 which is best as of yet.
@@ -357,7 +357,9 @@ label.names
 
 # creating accuracy table showing accuracy of each model for each label.
 accuracy.table <- data.frame(label = label.names, Support.Vector.Machine = svm.accuracy,
-                             Random.Forest = rf.accuracy, k.Nearest.Neighbor = knn.accuracy)
+                            Random.Forest = rf.accuracy, k.Nearest.Neighbor = knn.accuracy,
+                            ensemble.model = ensemble.accuracy)
+
 print(accuracy.table)
 # Thal label has NA value because it had only one value in the data set.
 # So it either came in train set or test set and hence no algorithm predicted it.
@@ -365,13 +367,14 @@ print(accuracy.table)
 
 # converting the table to long format
 accuracy.table.long <- gather(accuracy.table, algorithm, accuracy,
-                            Support.Vector.Machine:k.Nearest.Neighbor)
+                            Support.Vector.Machine:ensemble.model)
 print(accuracy.table.long)
 
 # accuracy tables for each algorithm
 accuracy.svm.table <- accuracy.table.long[1:28, ]
 accuracy.rf.table <- accuracy.table.long[29:56, ]
 accuracy.knn.table <- accuracy.table.long[57:84, ]
+accuracy.ensemble.table <- accuracy.table.long[85:112, ]
 
 ## Visualizing the accuracies
 ## this will show a warning that 3 rows are removed, those three rows are for Thal which has NA value.
@@ -401,6 +404,13 @@ ggplot(data = subset(accuracy.table.long, accuracy.table.long$algorithm == "Supp
     theme(legend.position = "bottom") +
     labs(title = "Accuracy of Support Vector Machine", x = "Label", y = "Accuracy (in %)")
 
+# ensemble accuracy
+ggplot(data = subset(accuracy.table.long, accuracy.table.long$algorithm == "ensemble.model"),
+       aes(x = label, y = accuracy)) + 
+    geom_bar(stat = "identity", position = "dodge", fill = "darkcyan") +
+    theme(legend.position = "bottom") +
+    labs(title = "Accuracy of Support Vector Machine", x = "Label", y = "Accuracy (in %)")
+
 ## writing to excel file
 
 write.xlsx(accuracy.table.long, "accuracy-long-format.xlsx")
@@ -408,9 +418,10 @@ write.xlsx(accuracy.table, "accuracy-table.xlsx")
 write.xlsx(accuracy.svm.table, "accuracy-table-svm.xlsx")
 write.xlsx(accuracy.rf.table, "accuracy-table-rf.xlsx")
 write.xlsx(accuracy.knn.table, "accuracy-table-knn.xlsx")
-
+write.xlsx(results, "results.xlsx")
 
 ## end of script ===================================================================================
+
 
 
 
